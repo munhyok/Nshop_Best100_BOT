@@ -43,7 +43,7 @@ printPrice = ''
 url = 'https://search.shopping.naver.com/best/category/click?categoryCategoryId=50000151&categoryChildCategoryId=&categoryDemo=A00&categoryMidCategoryId=50000151&categoryRootCategoryId=50000003&chartRank=1&period=P7D'
 
 options = webdriver.ChromeOptions()
-options.add_experimental_option('excludeSwitches', ['enable-logging'])
+#options.add_experimental_option('excludeSwitches', ['enable-logging'])
 options.add_argument("headless")
 
 def make_clickable(val):
@@ -177,7 +177,7 @@ def initPrototype():
 
 def bestRank():
     
-    activeLabel('에러발생!! 나중에 다시 시도해주세요 :)')
+    activeLabel('에러발생!! 초기데이터 생성 혹은 잠시 후에 시도해주세요')
     driver = webdriver.Chrome(executable_path='./chromedriver', options=options)
     
     now=datetime.datetime.now()
