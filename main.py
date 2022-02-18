@@ -358,7 +358,7 @@ window.resizable(False,False)
 pTitle = Label(window, text = '네이버 쇼핑 크롤링 봇')
 
     
-pProgress = Label(window, text= "버전 1.0")
+pProgress = Label(window, text= "버전 1.3")
     
 initBtn = Button(window, text='초기데이터 수집', command=initPrototype)
 bestRankBtn = Button(window, text='현재 Best 순위 수집', command=bestRank)
