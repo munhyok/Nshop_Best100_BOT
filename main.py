@@ -7,6 +7,7 @@ import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+from webdriver_manager.chrome import ChromeDriverManager
 from datetime import date
 from datetime import datetime
 import datetime
@@ -15,6 +16,8 @@ import time
 import tkinter
 from tkinter import *
 import tkinter.ttk
+from tkinter import messagebox
+from tkinter import filedialog
 
 import pandas as pd
 import numpy as np
@@ -24,6 +27,7 @@ from openpyxl.styles.differential import DifferentialStyle
 from openpyxl.formatting.rule import Rule
 
 import platform
+from pyshorteners import Shortener
 import pyshorteners
 
 
@@ -76,6 +80,7 @@ def doScrollDown(whileSeconds, driver):
             break
     
 
+
 def initPrototype():
     
     activeLabel('에러발생!! 나중에 다시 시도해주세요 :)')
@@ -85,7 +90,7 @@ def initPrototype():
     deviceNameList = []
     lowPriceList = []
     reviewList = []
-    driver = webdriver.Chrome(executable_path='./chromedriver', options=options)
+    driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
 
     # driver.implicitly_wait(3)
     # url에 접근한다.
@@ -172,14 +177,13 @@ def initPrototype():
     driver.quit()
     
     activeLabel('완료!')
+    messagebox.showinfo('초기데이터', '데이터수집이 완료되었습니다 엑셀을 확인해주세요')
 
 
-
-def bestRank():
+def bestRank(fileName):
     
-    activeLabel('에러발생!! 초기데이터 생성 혹은 잠시 후에 시도해주세요')
-    driver = webdriver.Chrome(executable_path='./chromedriver', options=options)
-    
+    activeLabel('에러발생!! 나중에 다시 시도해주세요 :)')
+    time.sleep(1)
     now=datetime.datetime.now()
     nowHour = now.hour
     nowMinute = now.minute
@@ -197,9 +201,14 @@ def bestRank():
     changeReviewList = []
     changeHyperList = []
     
-    urlShort = pyshorteners.Shortener()
+    urlShort = Shortener()
+    instance = urlShort.tinyurl
     
-    driver.implicitly_wait(3)
+    driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
+    
+    
+    
+    #driver.implicitly_wait(3)
     # url에 접근한다.
     driver.get(url)
 
@@ -279,7 +288,7 @@ def bestRank():
         
         
     for i in range (len(hyperlinkList)):
-        changeHyperList.append('=HYPERLINK("{}", "{}")'.format(urlShort.tinyurl.short(str(hyperlinkList[i])), "바로가기"))
+        changeHyperList.append('=HYPERLINK("{}", "{}")'.format(instance.short(str(hyperlinkList[i])), "바로가기"))
     
 
     list_of_tuples = list(zip(deviceNameList,lowPriceList,reviewList,changePriceList,changeReviewList,changeHyperList))
@@ -292,10 +301,10 @@ def bestRank():
     
     
     
-    with pd.ExcelWriter(nowDate+'.xlsx', mode='a', engine='openpyxl') as writer:
+    with pd.ExcelWriter(fileName, mode='a', engine='openpyxl') as writer:
         df.to_excel(writer, header=True, index= True, sheet_name='최저가데이터 '+nowDate+' '+str(nowHour)+'시'+str(nowMinute)+'분',index_label='순위')
     
-    workbook = load_workbook(filename=nowDate+'.xlsx')
+    workbook = load_workbook(filename=fileName)
     sheet = workbook['최저가데이터 '+nowDate+' '+str(nowHour)+'시'+str(nowMinute)+'분']
     red_fill = PatternFill(bgColor='F6C9CE')
     yellow_fill = PatternFill(bgColor='FCECA6')
@@ -321,12 +330,14 @@ def bestRank():
     
     
     
-    workbook.save(nowDate+'.xlsx')
+    workbook.save(fileName)
     workbook.close()
     
     driver.quit()
     activeLabel('best100 완료')
+    messagebox.showinfo('Best100', '데이터수집이 완료되었습니다 엑셀을 확인해주세요')
     
+
 
        
 def main():
@@ -351,17 +362,27 @@ def main():
 
 
 window = tkinter.Tk()
+
+def fileExplore():
+    #global fileName
+    fileName = filedialog.askopenfilename(initialdir='./', title='파일 선택')
     
+    if fileName == '':
+        pass
+    else:
+        bestRank(fileName)
+        
+        
 window.title('네이버 쇼핑 크롤링 봇')
 window.geometry('300x150+200+100')
 window.resizable(False,False)
 pTitle = Label(window, text = '네이버 쇼핑 크롤링 봇')
 
     
-pProgress = Label(window, text= "버전 1.3")
+pProgress = Label(window, text= "버전 1.6")
     
 initBtn = Button(window, text='초기데이터 수집', command=initPrototype)
-bestRankBtn = Button(window, text='현재 Best 순위 수집', command=bestRank)
+bestRankBtn = Button(window, text='현재 Best 순위 수집', command=fileExplore)
     
    
     
